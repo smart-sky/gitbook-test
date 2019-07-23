@@ -6,3 +6,10 @@
 
 这是develop
 
+@Override
+public List<Map<String, Object>> getOpenWeekHouseTypeByProduct(final String product,String 		  projectName) {
+      return this.ixmkpbiDao.getOpenWeekHouseTypeByProduct(product,projectName);
+	
+	
+}
+
