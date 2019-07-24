@@ -88,14 +88,6 @@ id sem consectetuer libero luctus adipiscing.
 </html>
 ```
 
-### 图片 Images
-
-图片加链接 (Image + Link)：
-
-
-[![](https://www.mdeditor.com/images/logos/markdown.png)](https://www.mdeditor.com/images/logos/markdown.png "markdown")
-
-> Follow your heart.
 
 
 
