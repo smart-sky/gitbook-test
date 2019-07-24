@@ -99,19 +99,6 @@ id sem consectetuer libero luctus adipiscing.
 
 ----
 
-###java代码
-```java
-    @ResponseBody
-	@RequestMapping("/getProjectInfoByProName")
-	public ResponseData getProjectInfoByProName(final String projectName) {
-		try {
-			Map<String, Object> data = this.service.getProjectInfoByProName(projectName);
 
-			return new ResponseData("0", "查询成功", data);
-		} catch (Exception e) {
-			return new ResponseData("999", "查询失败", null);
-		}
-	}
-```
 
 
