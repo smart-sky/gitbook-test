@@ -6,10 +6,12 @@
 
 这是develop
 
+```java
 @Override
-public List<Map<String, Object>> getOpenWeekHouseTypeByProduct(final String product,String 		  projectName) {
+public List<Map<String, Object>> getOpenWeekHouseTypeByProduct(final String product,String projectName) {
       return this.ixmkpbiDao.getOpenWeekHouseTypeByProduct(product,projectName);
 	
 	
 }
+```
 
