@@ -53,10 +53,18 @@ id sem consectetuer libero luctus adipiscing.
 
 
 #### JS代码
-```javascript
-function test() {
-	console.log("Hello world!");
-}
+```java
+    @ResponseBody
+	@RequestMapping("/getProjectInfoByProName")
+	public ResponseData getProjectInfoByProName(final String projectName) {
+		try {
+			Map<String, Object> data = this.service.getProjectInfoByProName(projectName);
+
+			return new ResponseData("0", "查询成功", data);
+		} catch (Exception e) {
+			return new ResponseData("999", "查询失败", null);
+		}
+	}
 ```
 
 
@@ -90,3 +98,20 @@ function test() {
 > Follow your heart.
 
 ----
+
+###java代码
+```java
+    @ResponseBody
+	@RequestMapping("/getProjectInfoByProName")
+	public ResponseData getProjectInfoByProName(final String projectName) {
+		try {
+			Map<String, Object> data = this.service.getProjectInfoByProName(projectName);
+
+			return new ResponseData("0", "查询成功", data);
+		} catch (Exception e) {
+			return new ResponseData("999", "查询失败", null);
+		}
+	}
+```
+
+
