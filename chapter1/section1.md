@@ -11,5 +11,5 @@ public List<Map<String, Object>> getOpenWeekHouseTypeByProduct(final String prod
       return this.ixmkpbiDao.getOpenWeekHouseTypeByProduct(product,projectName);
 	
 	
-}
+}7
 
