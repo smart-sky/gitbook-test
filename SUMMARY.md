@@ -7,7 +7,7 @@
 * [工具类](tools/Utils.md)
     * [时间](tools/time.md)
     * [字符串处理](tools/String.md)
-* [工具类](SUM/SUM.md)
+* [项目管理规范](SUM/SUM.md)
     * [个人总结编码规范](SUM/writeCode.md)
     * [日常管理规范](SUM/mamager.md)
 
