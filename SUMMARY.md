@@ -18,8 +18,6 @@
     * [版本控制类型](Knowledge/version.md)
     * [代码规范](Knowledge/codeClean.md)
     * [前端技术](Knowledge/front end.md)
-    
-
 * [结束](end/README.md) 
 * [MD学习](test/test.md) 
 
