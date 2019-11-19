@@ -1,17 +1,16 @@
-#springSecurity的springboot配置
+
+
 
 ##概述
-  首先需要的基础springBoot环境。
-  
-  
+首先需要的基础springBoot环境。
 ##步骤
 ###1.包依赖
 
 ```xml
-        <dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-security</artifactId>
+</dependency>
 ```
 
 ###2.总配置代码
@@ -148,7 +147,9 @@ public class WebSecurityConfig  extends WebSecurityConfigurerAdapter {
                 //防护CSRF
                 .csrf()
                     .disable()
-                    .exceptionHandling()
+                //异常处理配置
+                .exceptionHandling()
+                    //权限不足时处理
                     .accessDeniedHandler(deniedHandler);
     }
 }
@@ -156,12 +157,308 @@ public class WebSecurityConfig  extends WebSecurityConfigurerAdapter {
 
 ###3.获取用户详情，验证用户
 
-继承UserDetailsService 
+继承UserDetailsService
+
+```java
+@Service
+@Transactional
+public class HrService implements UserDetailsService {
+
+    @Autowired
+    HrMapper hrMapper;
+
+    /**
+     *  用于验证客户信息
+     * @param s 帐号
+     * @return
+     * @throws UsernameNotFoundException
+     */
+    @Override
+    public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
+        Hr hr = hrMapper.loadUserByUsername(s);
+        if (hr == null){
+            throw new UsernameNotFoundException("用户名不对");
+        }
+        return hr;
+    }
+    public List<Hr> getAllHr() {
+        return hrMapper.getAllHr(null);
+    }
+}
+```
+
+
+其中的Hr类是需要实现UserDetails
+
+```java
+public class Hr implements UserDetails {
+    private Long id;
+    private String name;
+    private String phone;
+    private String telephone;
+    private String address;
+    private boolean enabled;
+    private String username;
+    private String password;
+    private String remark;
+    private List<Role> roles;
+    private String userface;
 
 
 
 
-111
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+       List<GrantedAuthority> authorities = new ArrayList<>();
+       for(Role role :roles){
+           authorities.add(new SimpleGrantedAuthority(role.getName()));
+        }
+        return authorities;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getTelephone() {
+        return telephone;
+    }
+
+    public void setTelephone(String telephone) {
+        this.telephone = telephone;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
+
+    public List<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
+    }
+
+    public String getUserface() {
+        return userface;
+    }
+
+    public void setUserface(String userface) {
+        this.userface = userface;
+    }
+}
+
+```
+查询库的语句是
+```xml
+<select id="loadUserByUsername" resultMap="lazyLoadRoles">
+	select * from hr where username = #{username}
+</select>
+<select id="getRolesByHrId" resultType="org.sang.bean.Role">
+	select r.* from hr_role h,role r where h.rid=r.id and h.hrid =#{id}
+</select>
+<resultMap id="lazyLoadRoles" type="org.sang.bean.Hr" extends="BaseResultMap">
+	<collection property="roles" ofType="org.sang.bean.Hr" select="org.sang.mapper.HrMapper.getRolesByHrId"
+column="id">
+  	</collection>
+</resultMap>
+```
+
+###4.配置查询页面所需要的角色
+```java
+
+/**
+ * 该类的主要功能就是通过当前的请求地址，获取该地址需要的用户角色
+ */
+
+@Component
+public class CustomMetadataSource implements FilterInvocationSecurityMetadataSource {
+
+    @Autowired
+    MenuService menuService;
+    AntPathMatcher antPathMatcher = new AntPathMatcher();
+    @Override
+    public Collection<ConfigAttribute> getAttributes(Object o) throws IllegalArgumentException {
+        String requestUrl = ((FilterInvocation) o).getRequestUrl();
+        List<Menu> allMenu = menuService.getAllMenu();
+        for (Menu menu:allMenu){
+            if (antPathMatcher.match(menu.getUrl(),requestUrl) && menu.getRoles().size()>0){
+                List<Role> roles = menu.getRoles();
+                int size = roles.size();
+                String[] values = new String[size];
+                for (int i = 0;i<size;i++){
+                    values[i] = roles.get(i).getName();
+                }
+                return SecurityConfig.createList(values);
+            }
+        }
+        return SecurityConfig.createList("ROLE_LOGIN");
+
+    }
+
+    @Override
+    public Collection<ConfigAttribute> getAllConfigAttributes() {
+        return null;
+    }
+
+    @Override
+    public boolean supports(Class<?> aClass) {
+        return false;
+    }
+}
+```
+
+
+
+
+
+###5.查询帐号所拥有的角色
+```java
+@Component
+public class UrlAccessDecisionManager implements AccessDecisionManager {
+
+//    其中第一个参数中保存了当前登录用户的角色信息
+//    ，第三个参数则是UrlFilterInvocationSecurityMetadataSource中的getAttributes方法传来的，表示当前请求需要的角色（可能有多个）。
+    @Override
+    public void decide(Authentication auth, Object o, Collection<ConfigAttribute> cas) {
+        Iterator<ConfigAttribute> iterator = cas.iterator();
+        while (iterator.hasNext()){
+
+            ConfigAttribute ca = iterator.next();
+
+            //当前请求需要得权限
+            String needRole = ca.getAttribute();
+            if ("ROLE_LOGIN".equals(needRole)){
+                if (auth instanceof AnonymousAuthenticationToken){
+                    throw new BadCredentialsException("未登陆");
+                }else{
+                    return;
+                }
+            }
+            //当前用户所具有得权限
+            Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
+            for (GrantedAuthority authority : authorities){
+                if (authority.getAuthority().equals(needRole)){
+                    return;
+                }
+            }
+        }
+        throw new AccessDeniedException("权限不足");
+    }
+
+    @Override
+    public boolean supports(ConfigAttribute configAttribute) {
+        return false;
+    }
+
+    @Override
+    public boolean supports(Class<?> aClass) {
+        return false;
+    }
+}
+
+```
+
+
+
+### 6.无权限异常处理
+
+```java
+@Component
+public class AuthenticationAccessDeniedHandler implements AccessDeniedHandler {
+
+
+    @Override
+    public void handle(HttpServletRequest httpServletRequest, HttpServletResponse resp, AccessDeniedException e) throws IOException{
+        resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        resp.setContentType("application/json;charset=UTF-8");
+        PrintWriter out = resp.getWriter();
+        RespBean error =  RespBean.error("权限不足，请联系管理员!");
+        out.write(new ObjectMapper().writeValueAsString(error));
+        out.flush();
+        out.close();
+    }
+}
+```
+
+
+
+
 
 
 
