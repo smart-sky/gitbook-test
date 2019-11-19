@@ -155,34 +155,13 @@ public class WebSecurityConfig  extends WebSecurityConfigurerAdapter {
 ```
 
 ###3.获取用户详情，验证用户
-```java
-@Service
-@Transactional
-public class HrService implements UserDetailsService {
 
-    @Autowired
-    HrMapper hrMapper;
+继承UserDetailsService 
 
-    /**
-     *  用于验证客户信息
-     * @param s 帐号
-     * @return
-     * @throws UsernameNotFoundException
-     */
-    @Override
-    public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
-        Hr hr = hrMapper.loadUserByUsername(s);
-        if (hr == null){
-            throw new UsernameNotFoundException("用户名不对");
-        }
-        return hr;
-    }
-    public List<Hr> getAllHr() {
-        return hrMapper.getAllHr(null);
-    }
-}
 
-```
+
+
+111
 
 
 
